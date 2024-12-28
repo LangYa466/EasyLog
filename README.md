@@ -23,7 +23,7 @@ Logger.setDateFormat("yyyy-MM-dd HH:mm");
 ```
 
 控制台输出：
-![image](https://github.com/user-attachments/assets/e1dbc41a-b528-428d-8afd-696cbed08d9b)
+![image](https://github.com/user-attachments/assets/981d3b7f-3902-45fa-8d64-d30e016a8627)
 
 
 默认日志文件输出
