@@ -12,7 +12,7 @@ public class Main {
         Logger.info("Application started");
         Logger.debug("Debugging variable x={}, y={}", 42, 84);
         Logger.warn("This is a warning!");
-        Logger.error("An error occurred: {}", "File not found");
+        Logger.error("An error occurred: { }", "File not found");
 
         try {
             throw new RuntimeException("Test Exception");
