@@ -17,6 +17,11 @@ EasyLog 是一个轻量级的 Java 日志库，支持彩色日志输出、格式
 
 ### 输出示例
 
+自定义日志等级
+```java
+Logger.setLogLevel(LogLevel.WARN);
+```
+
 自定义日期格式(默认 yyyy-MM-dd HH:mm:ss)
 ```java
 Logger.setDateFormat("yyyy-MM-dd HH:mm");
