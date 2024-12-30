@@ -8,14 +8,16 @@ import cn.langya.Logger;
  */
 public class Main {
     public static void main(String[] args) {
+        Logger.setLogLevel(Logger.LogLevel.DEBUG);
         Logger.setLogFile("mylog.log");
         Logger.info("Application started");
-        Logger.debug("Debugging variable x={}, y={}", 42, 84);
+        Logger.debug("Debugging variable x={ }, y={ }", 42, 84);
         Logger.warn("This is a warning!");
         Logger.error("An error occurred: { }", "File not found");
 
         try {
-            throw new RuntimeException("Test Exception");
+            throw 
+                    new RuntimeException("Test Exception");
         } catch (Exception e) {
             Logger.error("Caught exception", e);
         }
