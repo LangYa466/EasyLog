@@ -26,7 +26,7 @@ public class Logger {
     private static final String BLUE = "\u001B[34m"; // 新增：用于TRACE日志的颜色
 
     private static String logFile = DEFAULT_LOG_FILE;
-    private static String format = "{ }";
+    private static String format = "{}";
     private static LogLevel currentLogLevel = LogLevel.INFO; // 默认日志等级为INFO
 
     /**
