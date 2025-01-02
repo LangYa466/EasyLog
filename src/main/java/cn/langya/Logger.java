@@ -83,7 +83,6 @@ public class Logger {
                 Thread.currentThread().interrupt();
             }
 
-            // 使用 System.out.println 输出最终日志
             System.out.println(finalMessage);
         });
     }

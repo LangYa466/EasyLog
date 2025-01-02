@@ -56,6 +56,9 @@ public class LogWriter implements Runnable {
                     Method writeMethod = this.getClass().getDeclaredMethod("writeLog", ByteBuffer.class);
                     writeMethod.setAccessible(true);
                     writeMethod.invoke(this, buffer);  // 反射调用
+
+                    // 打印日志写入操作信息
+                    System.out.println("Written batch of " + batchLogs.size() + " log messages.");
                 }
 
             } catch (InterruptedException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -68,11 +71,13 @@ public class LogWriter implements Runnable {
         running = false;
         try {
             fileChannel.close();  // 关闭文件通道
+            System.out.println("Log file channel closed.");
         } catch (IOException e) {
             System.err.println("Error closing log file: " + e.getMessage());
         }
         executorService.shutdown();  // 关闭执行器
         writeExecutorService.shutdown();  // 关闭写入执行器
+        System.out.println("Executor services shut down.");
     }
 
     // 更新日志文件路径
@@ -81,9 +86,11 @@ public class LogWriter implements Runnable {
             // 关闭现有的 fileChannel
             if (fileChannel != null) {
                 fileChannel.close();
+                System.out.println("Previous log file channel closed.");
             }
             // 初始化新的 fileChannel
             initializeFileChannel(filePath);
+            System.out.println("Log file path updated to: " + filePath);
         } catch (IOException e) {
             System.err.println("Error updating log file: " + e.getMessage());
         }
@@ -94,6 +101,7 @@ public class LogWriter implements Runnable {
         Path path = Paths.get(logFile);
         try {
             fileChannel = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
+            System.out.println("File channel initialized for log file: " + logFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,6 +113,7 @@ public class LogWriter implements Runnable {
         try {
             synchronized (fileChannel) {  // 保证文件写入操作是线程安全的
                 fileChannel.write(buffer);
+                System.out.println("Log written to file.");
             }
         } catch (IOException e) {
             System.err.println("Error writing log asynchronously: " + e.getMessage());
