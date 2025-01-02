@@ -11,7 +11,7 @@ public class LogPerformanceTest {
     private static final Logger log4jLogger = LogManager.getLogger(LogPerformanceTest.class);
 
     public static void main(String[] args) {
-        int logCount = 1000;
+        int logCount = 1000000;
 
         // Measure EasyLog performance
         long startTimeEasyLog = System.nanoTime();

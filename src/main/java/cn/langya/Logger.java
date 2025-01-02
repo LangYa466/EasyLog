@@ -13,12 +13,18 @@ import java.util.concurrent.*;
  */
 public class Logger {
     private static final String DEFAULT_LOG_FILE = "langya.log";
-    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static final ExecutorService executor = Executors.newFixedThreadPool(4);  // 使用多线程执行器
-    private static final ExecutorService printExecutor = Executors.newFixedThreadPool(8);  // 用于异步打印日志的线程池
-    public static final BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();  // 使用阻塞队列
+    private static final ExecutorService executor = Executors.newFixedThreadPool(4);  // 用于日志生成的线程池
+    private static final BlockingQueue<String> logQueue = new LinkedBlockingQueue<>(1000);  // 日志队列，最多存储1000条日志
     private static LogLevel currentLogLevel = LogLevel.INFO;
     private static String logFilePath = DEFAULT_LOG_FILE;
+
+    private static Thread logWriterThread;  // 日志写入线程
+
+    static {
+        // 启动日志写入线程
+        logWriterThread = new Thread(Logger::writeLogsToFile);
+        logWriterThread.start();
+    }
 
     public static void setLogFile(String filePath) {
         logFilePath = filePath;
@@ -55,9 +61,9 @@ public class Logger {
         asyncPrint(level, message, args);
     }
 
-    // 异步打印日志到控制台并写入文件
+    // 异步打印日志到控制台并放入队列
     private static void asyncPrint(LogLevel level, String message, Object... args) {
-        printExecutor.submit(() -> {
+        executor.submit(() -> {
             // 时间戳
             String timestamp = String.format("[%s]", LocalDateTime.now());
 
@@ -72,7 +78,6 @@ public class Logger {
 
             try {
                 logQueue.put(finalMessage);  // 将日志消息放入队列
-                writeToFile(finalMessage);  // 写入文件
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -80,6 +85,19 @@ public class Logger {
             // 输出到控制台
             System.out.println(finalMessage);
         });
+    }
+
+    // 专门的线程负责将日志写入文件
+    private static void writeLogsToFile() {
+        while (true) {
+            try {
+                String logMessage = logQueue.take();  // 从队列中取出日志
+                writeToFile(logMessage);  // 写入文件
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;  // 线程中断，退出循环
+            }
+        }
     }
 
     // 将日志写入文件
@@ -94,18 +112,20 @@ public class Logger {
     }
 
     public static void shutdown() {
-        executor.shutdown();  // 关闭线程池
-        printExecutor.shutdown();  // 关闭打印线程池
+        // 关闭线程池
+        executor.shutdown();
+        logWriterThread.interrupt();  // 中断日志写入线程
+
         try {
-            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+            // 等待线程池关闭
+            if (!executor.awaitTermination(1, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
             }
-            if (!printExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
-                printExecutor.shutdownNow();
-            }
+
+            // 等待日志写入线程完成
+            logWriterThread.join();
         } catch (InterruptedException e) {
             executor.shutdownNow();
-            printExecutor.shutdownNow();
         }
     }
 
