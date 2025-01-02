@@ -16,8 +16,7 @@ public class Main {
         Logger.error("An error occurred: {}", "File not found");
 
         try {
-            throw 
-                    new RuntimeException("Test Exception");
+            throw new RuntimeException("Test Exception");
         } catch (Exception e) {
             Logger.error("Caught exception", e);
         }
