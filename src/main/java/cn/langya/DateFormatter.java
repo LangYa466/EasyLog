@@ -2,6 +2,7 @@ package cn.langya;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.*;
 
 import static cn.langya.Logger.DATE_FORMAT;
 
@@ -10,27 +11,27 @@ import static cn.langya.Logger.DATE_FORMAT;
  * @since 2025/1/2
  */
 public class DateFormatter {
-    // 使用ThreadLocal来缓存DateTimeFormatter实例，避免每次都创建新的实例
-    private static final ThreadLocal<DateTimeFormatter> DATE_FORMATTER =
-            ThreadLocal.withInitial(() -> DateTimeFormatter.ofPattern(DATE_FORMAT));
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(8);  // 线程池大小根据需求调整
 
-    // 格式化当前时间为字符串
-    public static String format(LocalDateTime dateTime) {
-        return dateTime.format(DATE_FORMATTER.get());
+    // 格式化当前时间为字符串，异步执行
+    public static Future<String> formatAsync(LocalDateTime dateTime) {
+        return executorService.submit(() -> dateTime.format(DATE_FORMATTER));
     }
 
-    // 解析字符串为LocalDateTime
-    public static LocalDateTime parse(String dateStr) {
-        return LocalDateTime.parse(dateStr, DATE_FORMATTER.get());
+    // 解析字符串为LocalDateTime，异步执行
+    public static Future<LocalDateTime> parseAsync(String dateStr) {
+        return executorService.submit(() -> LocalDateTime.parse(dateStr, DATE_FORMATTER));
     }
 
-    public static void main(String[] args) {
-        // 测试格式化和解析
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        // 测试异步格式化和解析
         LocalDateTime now = LocalDateTime.now();
-        String formattedDate = format(now);
-        System.out.println("Formatted Date: " + formattedDate);
+        Future<String> formattedDateFuture = formatAsync(now);
+        System.out.println("Formatted Date: " + formattedDateFuture.get());
 
-        LocalDateTime parsedDate = parse(formattedDate);
-        System.out.println("Parsed Date: " + parsedDate);
+        String formattedDate = formattedDateFuture.get();
+        Future<LocalDateTime> parsedDateFuture = parseAsync(formattedDate);
+        System.out.println("Parsed Date: " + parsedDateFuture.get());
     }
 }
