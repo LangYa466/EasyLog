@@ -11,6 +11,7 @@ public class Logger {
     private static final String DEFAULT_LOG_FILE = "langya.log";
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final ExecutorService executor = Executors.newFixedThreadPool(4);  // 使用多线程执行器
+    private static final ExecutorService printExecutor = Executors.newFixedThreadPool(8);  // 用于异步打印日志的线程池
     public static final BlockingQueue<String> logQueue = new LinkedTransferQueue<>();  // 使用无界队列
     private static final LogWriter logWriter;
     private static String logFile = DEFAULT_LOG_FILE;
@@ -55,17 +56,42 @@ public class Logger {
         if (level.getLevel() < currentLogLevel.getLevel()) {
             return;  // 如果当前日志级别低于设置的级别，则不输出
         }
-        String logMessage = String.format("[%s] [%s] %s", LocalDateTime.now(), level, String.format(message, args));
-        try {
-            logQueue.put(logMessage);  // 将日志消息放入队列
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+       asyncPrint(level,message,args);
+    }
+
+    // 异步打印日志到控制台，并添加额外的包装信息
+    private static void asyncPrint(LogLevel level, String message, Object... args) {
+        printExecutor.submit(() -> {
+            // 第一层包装：加上线程信息
+            String threadInfo = String.format("[Thread: %s]", Thread.currentThread().getName());
+
+            // 第二层包装：加上时间戳
+            String timestamp = String.format("[%s]", LocalDateTime.now());
+
+            // 第三层包装：日志类型
+            String logLevel = String.format("[%s]", level);
+
+            // 格式化消息内容
+            String formattedMessage = String.format(message, args);
+
+            // 最终的日志信息
+            String finalMessage = String.format("%s %s %s %s", timestamp, threadInfo, logLevel, formattedMessage);
+
+            try {
+                logQueue.put(finalMessage);  // 将日志消息放入队列
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            // 使用 System.out.println 输出最终日志
+            System.out.println(finalMessage);
+        });
     }
 
     public static void shutdown() {
         logWriter.stopWriting();  // 停止日志写入线程
         executor.shutdown();  // 关闭线程池
+        printExecutor.shutdown();  // 关闭打印线程池
     }
 
     // 日志级别枚举
