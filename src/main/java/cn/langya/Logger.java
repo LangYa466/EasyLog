@@ -12,11 +12,13 @@ import java.util.concurrent.*;
  * @since 2024/12/27
  */
 public class Logger {
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final String DEFAULT_LOG_FILE = "langya.log";
     private static final ExecutorService executor = Executors.newFixedThreadPool(4);  // 用于日志生成的线程池
     private static final BlockingQueue<String> logQueue = new LinkedBlockingQueue<>(1000);  // 日志队列，最多存储1000条日志
     private static LogLevel currentLogLevel = LogLevel.INFO;
     private static String logFilePath = DEFAULT_LOG_FILE;
+
 
     private static Thread logWriterThread;  // 日志写入线程
 
