@@ -19,7 +19,6 @@ public class Logger {
     private static LogLevel currentLogLevel = LogLevel.INFO;
     private static String logFilePath = DEFAULT_LOG_FILE;
 
-
     private static Thread logWriterThread;  // 日志写入线程
 
     static {
