@@ -10,6 +10,7 @@ EasyLog 是一个适合高并发项目的日志框架的 Java 日志库、格式
 - **格式化消息**：支持 `{}` 占位符，用于动态插入变量。
 - **异常堆栈**：可记录完整的异常堆栈信息。
 
+## 记得用Logger.shutdown()；！！
 ### 引入库
 
 [云端仓库](https://jitpack.io/#LangYa466/EasyLog/1.0) 或 [Github](https://github.com/LangYa466/EasyLog/releases)
