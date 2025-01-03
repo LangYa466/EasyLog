@@ -24,7 +24,7 @@ public class Logger {
     private static final String YELLOW = "\u001B[33m";
     private static final String GREEN = "\u001B[32m";
     private static final String CYAN = "\u001B[36m";
-    private static final String BLUE = "\u001B[34m"; // 新增：用于TRACE日志的颜色
+    private static final String BLUE = "\u001B[34m";
 
 
     private static Thread logWriterThread;  // 日志写入线程
@@ -79,7 +79,7 @@ public class Logger {
     }
 
     // 异步打印日志到控制台并放入队列
-    private static void asyncPrint(LogLevel level,String color, String message, Object... args) {
+    private static void asyncPrint(LogLevel level, String color, String message, Object... args) {
         executor.submit(() -> {
             // 时间戳
             String timestamp = String.format("[%s]", LocalDateTime.now());
@@ -91,7 +91,7 @@ public class Logger {
             String formattedMessage = String.format(message, args);
 
             // 最终的日志信息
-            String finalMessage = String.format("%s %s %s %s %s",color, timestamp, logLevel, formattedMessage, RESET);
+            String finalMessage = String.format("%s%s %s %s %s", color, timestamp, logLevel, formattedMessage, RESET);  // 修正拼接
 
             try {
                 logQueue.put(finalMessage);  // 将日志消息放入队列
