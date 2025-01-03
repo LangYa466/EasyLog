@@ -10,6 +10,7 @@ public class LogPerformanceTest {
 
         // Measure EasyLog performance
         long startTimeEasyLog = System.nanoTime();
+        cn.langya.Logger.setNoWriteFile();
         for (int i = 0; i < logCount; i++) {
             cn.langya.Logger.info("Test message {}", i);
         }

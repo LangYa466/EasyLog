@@ -27,6 +27,14 @@ public class Logger {
         logWriterThread.start();
     }
 
+    public static void setNoWriteFile() {
+        Logger.logWriterThread = null;
+    }
+
+    public static void setLogFilePath(String logFilePath) {
+        Logger.logFilePath = logFilePath;
+    }
+
     public static void setLogFile(String filePath) {
         logFilePath = filePath;
     }
@@ -115,7 +123,8 @@ public class Logger {
     public static void shutdown() {
         // 关闭线程池
         executor.shutdown();
-        logWriterThread.interrupt();  // 中断日志写入线程
+        boolean fileWriter = logWriterThread != null;
+        if (fileWriter) logWriterThread.interrupt();  // 中断日志写入线程
 
         try {
             // 等待线程池关闭
@@ -124,7 +133,7 @@ public class Logger {
             }
 
             // 等待日志写入线程完成
-            logWriterThread.join();
+            if (fileWriter) logWriterThread.join();
         } catch (InterruptedException e) {
             executor.shutdownNow();
         }
