@@ -13,6 +13,7 @@ public class LogPerformanceTest {
         for (int i = 0; i < logCount; i++) {
             cn.langya.Logger.info("Test message {}", i);
         }
+        cn.langya.Logger.shutdown();
         long endTimeEasyLog = System.nanoTime();
 
         // Measure TinyLog performance
