@@ -1,19 +1,21 @@
 # EasyLog
 
-EasyLog 是一个适合高并发项目的日志框架的 Java 日志库、格式化消息、日志文件记录等功能，适用于 Java 1.8。
+EasyLog 是一个轻量级的 Java 日志库，支持彩色日志输出、格式化消息、日志文件记录等功能，适用于 Java 1.8。
 
 ## 功能特点
 
 - **日志级别**：支持 `INFO`、`DEBUG`、`WARN` 和 `ERROR`。
+- **彩色输出**：根据日志级别，控制台输出不同颜色的日志消息。
 - **时间戳**：日志消息包含详细的时间戳（格式：`yyyy-MM-dd HH:mm:ss`）。
 - **日志文件**：默认输出到 `langya.log`，支持自定义文件路径。
 - **格式化消息**：支持 `{}` 占位符，用于动态插入变量。
 - **异常堆栈**：可记录完整的异常堆栈信息。
 
-## 记得用Logger.shutdown()；！！
 ### 引入库
 
 [云端仓库](https://jitpack.io/#LangYa466/EasyLog/1.0) 或 [Github](https://github.com/LangYa466/EasyLog/releases)
+
+## Logger.shutdown(); 防止日志没输出完就关闭
 
 ### 输出示例
 
@@ -26,9 +28,6 @@ Logger.setLogLevel(LogLevel.WARN);
 ```java
 Logger.setDateFormat("yyyy-MM-dd HH:mm");
 ```
-
-基准测试
-![image](https://github.com/user-attachments/assets/61db4026-1917-487c-92f7-bfe90c49ff16)
 
 控制台输出：
 ![image](https://github.com/user-attachments/assets/981d3b7f-3902-45fa-8d64-d30e016a8627)

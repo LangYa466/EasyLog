@@ -19,6 +19,14 @@ public class Logger {
     private static LogLevel currentLogLevel = LogLevel.INFO;
     private static String logFilePath = DEFAULT_LOG_FILE;
 
+    private static final String RESET = "\u001B[0m";
+    private static final String RED = "\u001B[31m";
+    private static final String YELLOW = "\u001B[33m";
+    private static final String GREEN = "\u001B[32m";
+    private static final String CYAN = "\u001B[36m";
+    private static final String BLUE = "\u001B[34m"; // 新增：用于TRACE日志的颜色
+
+
     private static Thread logWriterThread;  // 日志写入线程
 
     static {
@@ -44,34 +52,34 @@ public class Logger {
     }
 
     public static void trace(String message, Object... args) {
-        log(LogLevel.TRACE, message, args);
+        log(LogLevel.TRACE, BLUE, message, args);
     }
 
     public static void debug(String message, Object... args) {
-        log(LogLevel.DEBUG, message, args);
+        log(LogLevel.DEBUG, CYAN, message, args);
     }
 
     public static void info(String message, Object... args) {
-        log(LogLevel.INFO, message, args);
+        log(LogLevel.INFO, GREEN, message, args);
     }
 
     public static void warn(String message, Object... args) {
-        log(LogLevel.WARN, message, args);
+        log(LogLevel.WARN, YELLOW, message, args);
     }
 
     public static void error(String message, Object... args) {
-        log(LogLevel.ERROR, message, args);
+        log(LogLevel.ERROR, RED, message, args);
     }
 
-    private static void log(LogLevel level, String message, Object... args) {
+    private static void log(LogLevel level,String color, String message, Object... args) {
         if (level.getLevel() < currentLogLevel.getLevel()) {
             return;  // 如果当前日志级别低于设置的级别，则不输出
         }
-        asyncPrint(level, message, args);
+        asyncPrint(level, color, message, args);
     }
 
     // 异步打印日志到控制台并放入队列
-    private static void asyncPrint(LogLevel level, String message, Object... args) {
+    private static void asyncPrint(LogLevel level,String color, String message, Object... args) {
         executor.submit(() -> {
             // 时间戳
             String timestamp = String.format("[%s]", LocalDateTime.now());
@@ -83,7 +91,7 @@ public class Logger {
             String formattedMessage = String.format(message, args);
 
             // 最终的日志信息
-            String finalMessage = String.format("%s %s %s", timestamp, logLevel, formattedMessage);
+            String finalMessage = String.format("%s %s %s %s %s",color, timestamp, logLevel, formattedMessage, RESET);
 
             try {
                 logQueue.put(finalMessage);  // 将日志消息放入队列
