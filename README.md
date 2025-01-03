@@ -26,6 +26,9 @@ Logger.setLogLevel(LogLevel.WARN);
 Logger.setDateFormat("yyyy-MM-dd HH:mm");
 ```
 
+基准测试
+![image](https://github.com/user-attachments/assets/61db4026-1917-487c-92f7-bfe90c49ff16)
+
 控制台输出：
 ![image](https://github.com/user-attachments/assets/981d3b7f-3902-45fa-8d64-d30e016a8627)
 
