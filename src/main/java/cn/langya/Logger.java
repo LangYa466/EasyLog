@@ -19,13 +19,14 @@ public class Logger {
     private static LogLevel currentLogLevel = LogLevel.INFO;
     private static String logFilePath = DEFAULT_LOG_FILE;
 
+    private static String format = "{}";
+
     private static final String RESET = "\u001B[0m";
     private static final String RED = "\u001B[31m";
     private static final String YELLOW = "\u001B[33m";
     private static final String GREEN = "\u001B[32m";
     private static final String CYAN = "\u001B[36m";
     private static final String BLUE = "\u001B[34m";
-
 
     private static Thread logWriterThread;  // 日志写入线程
 
@@ -35,42 +36,97 @@ public class Logger {
         logWriterThread.start();
     }
 
+    /**
+     * 设置日志格式
+     * @param format 日志格式字符串
+     */
+    public static synchronized void setFormat(String format) {
+        Logger.format = format;
+    }
+
+    /**
+     * 设置不写入文件
+     */
     public static void setNoWriteFile() {
         Logger.logWriterThread = null;
     }
 
+    /**
+     * 设置日志文件路径
+     * @param logFilePath 日志文件路径
+     */
     public static void setLogFilePath(String logFilePath) {
         Logger.logFilePath = logFilePath;
     }
 
+    /**
+     * 设置日志文件
+     * @param filePath 日志文件路径
+     */
     public static void setLogFile(String filePath) {
         logFilePath = filePath;
     }
 
+    /**
+     * 设置日志级别
+     * @param level 日志级别
+     */
     public static void setLogLevel(LogLevel level) {
         currentLogLevel = level;
     }
 
+    /**
+     * 记录TRACE级别的日志
+     * @param message 日志信息
+     * @param args 日志参数
+     */
     public static void trace(String message, Object... args) {
         log(LogLevel.TRACE, BLUE, message, args);
     }
 
+    /**
+     * 记录DEBUG级别的日志
+     * @param message 日志信息
+     * @param args 日志参数
+     */
     public static void debug(String message, Object... args) {
         log(LogLevel.DEBUG, CYAN, message, args);
     }
 
+    /**
+     * 记录INFO级别的日志
+     * @param message 日志信息
+     * @param args 日志参数
+     */
     public static void info(String message, Object... args) {
         log(LogLevel.INFO, GREEN, message, args);
     }
 
+    /**
+     * 记录WARN级别的日志
+     * @param message 日志信息
+     * @param args 日志参数
+     */
     public static void warn(String message, Object... args) {
         log(LogLevel.WARN, YELLOW, message, args);
     }
 
+    /**
+     * 记录ERROR级别的日志
+     * @param message 日志信息
+     * @param args 日志参数
+     */
     public static void error(String message, Object... args) {
         log(LogLevel.ERROR, RED, message, args);
     }
 
+    /**
+     * 记录日志
+     * @param level 日志级别
+     * @param color 日志颜色
+     * @param message 日志信息
+     * @param args 日志参数
+     */
     private static void log(LogLevel level,String color, String message, Object... args) {
         if (level.getLevel() < currentLogLevel.getLevel()) {
             return;  // 如果当前日志级别低于设置的级别，则不输出
@@ -78,7 +134,26 @@ public class Logger {
         asyncPrint(level, color, message, args);
     }
 
-    // 异步打印日志到控制台并放入队列
+    /**
+     * 格式化日志信息
+     * @param message 日志信息
+     * @param args 日志参数
+     * @return 格式化后的日志信息
+     */
+    private static String format(String message, Object... args) {
+        if (args == null || args.length == 0) {
+            return message;
+        }
+        return String.format(message.replace(format, "%s"), args); // 使用 String.format 进行替换
+    }
+
+    /**
+     * 异步打印日志到控制台并放入队列
+     * @param level 日志级别
+     * @param color 日志颜色
+     * @param message 日志信息
+     * @param args 日志参数
+     */
     private static void asyncPrint(LogLevel level, String color, String message, Object... args) {
         executor.submit(() -> {
             // 时间戳
@@ -88,7 +163,7 @@ public class Logger {
             String logLevel = String.format("[%s]", level);
 
             // 格式化消息内容
-            String formattedMessage = String.format(message, args);
+            String formattedMessage = format(message, args);
 
             // 最终的日志信息
             String finalMessage = String.format("%s%s %s %s %s", color, timestamp, logLevel, formattedMessage, RESET);  // 修正拼接
@@ -104,7 +179,9 @@ public class Logger {
         });
     }
 
-    // 专门的线程负责将日志写入文件
+    /**
+     * 专门的线程负责将日志写入文件
+     */
     private static void writeLogsToFile() {
         while (true) {
             try {
@@ -117,7 +194,10 @@ public class Logger {
         }
     }
 
-    // 将日志写入文件
+    /**
+     * 将日志写入文件
+     * @param message 日志信息
+     */
     private static void writeToFile(String message) {
         File logFile = new File(logFilePath);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true))) {
@@ -128,6 +208,9 @@ public class Logger {
         }
     }
 
+    /**
+     * 关闭日志系统
+     */
     public static void shutdown() {
         // 关闭线程池
         executor.shutdown();
@@ -147,7 +230,9 @@ public class Logger {
         }
     }
 
-    // 日志级别枚举
+    /**
+     * 日志级别枚举
+     */
     public enum LogLevel {
         TRACE(0), DEBUG(1), INFO(2), WARN(3), ERROR(4);
 
