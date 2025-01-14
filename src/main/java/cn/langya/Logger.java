@@ -21,6 +21,7 @@ public class Logger {
 
     private static String format = "{}";
 
+    private static boolean hasColorInfo;
     private static final String RESET = "\u001B[0m";
     private static final String RED = "\u001B[31m";
     private static final String YELLOW = "\u001B[33m";
@@ -34,6 +35,10 @@ public class Logger {
         // 启动日志写入线程
         logWriterThread = new Thread(Logger::writeLogsToFile);
         logWriterThread.start();
+    }
+
+    public static void setHasColorInfo(boolean hasColorInfo) {
+        Logger.hasColorInfo = hasColorInfo;
     }
 
     /**
@@ -157,7 +162,7 @@ public class Logger {
     private static void asyncPrint(LogLevel level, String color, String message, Object... args) {
         executor.submit(() -> {
             // 时间戳
-            String timestamp = String.format("[%s]", LocalDateTime.now());
+            String timestamp = String.format("[%s]", DateFormatter.format(LocalDateTime.now()));
 
             // 日志类型
             String logLevel = String.format("[%s]", level);
@@ -166,11 +171,16 @@ public class Logger {
             String formattedMessage = format(message, args);
 
             // 最终的日志信息
-            String finalMessage = String.format("%s%s %s %s %s", color, timestamp, logLevel, formattedMessage, RESET);  // 修正拼接
+            String finalMessage;
+            if (hasColorInfo) {
+                finalMessage = String.format("%s%s %s %s %s", color, timestamp, logLevel, formattedMessage, RESET);
+            } else {
+                finalMessage = String.format("%s%s %s", timestamp, logLevel, formattedMessage);
+            }
 
             try {
-                String logMessage = String.format("%s%s %s %s", timestamp, logLevel, formattedMessage, RESET);  // 修正拼接
-                logQueue.put(finalMessage);  // 将日志消息放入队列
+                String logMessage = String.format("%s%s %s %s", timestamp, logLevel, formattedMessage, RESET);
+                logQueue.put(logMessage);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
