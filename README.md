@@ -13,7 +13,7 @@ EasyLog 是一个轻量级的 Java 日志库，支持彩色日志输出、格式
 
 ### 引入库
 
-[云端仓库](https://jitpack.io/#LangYa466/EasyLog/1.0) 或 [Github](https://github.com/LangYa466/EasyLog/releases)
+[云端仓库](https://jitpack.io/#LangYa466/EasyLog) 或 [Github](https://github.com/LangYa466/EasyLog/releases)
 
 ## Logger.shutdown(); 防止日志没输出完就关闭
 
