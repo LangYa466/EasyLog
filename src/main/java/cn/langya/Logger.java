@@ -169,6 +169,7 @@ public class Logger {
             String finalMessage = String.format("%s%s %s %s %s", color, timestamp, logLevel, formattedMessage, RESET);  // 修正拼接
 
             try {
+                String logMessage = String.format("%s%s %s %s", timestamp, logLevel, formattedMessage, RESET);  // 修正拼接
                 logQueue.put(finalMessage);  // 将日志消息放入队列
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
