@@ -179,7 +179,7 @@ public class Logger {
             }
 
             try {
-                String logMessage = String.format("%s%s %s %s", timestamp, logLevel, formattedMessage, RESET);
+                String logMessage = String.format("%s%s %s", timestamp, logLevel, formattedMessage);
                 logQueue.put(logMessage);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

@@ -1,5 +1,7 @@
 package com.langya;
 
+import cn.langya.Logger;
+
 /**
  * @author LangYa
  * @since 2025/1/2
@@ -7,6 +9,8 @@ package com.langya;
 public class LogPerformanceTest {
     public static void main(String[] args) {
         int logCount = 1000000;
+
+        Logger.setHasColorInfo(true);
 
         // Measure EasyLog performance
         long startTimeEasyLog = System.nanoTime();
