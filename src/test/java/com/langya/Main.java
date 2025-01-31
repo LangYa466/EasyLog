@@ -9,7 +9,7 @@ import cn.langya.Logger;
 public class Main {
     public static void main(String[] args) {
         // 设置日志文件路径和日志级别
-        Logger.setLogFile("mylog.log");
+        Logger.setLogFilePath("mylog.log");
         Logger.setLogLevel(Logger.LogLevel.DEBUG);
 
         // 测试日志
@@ -17,8 +17,5 @@ public class Main {
         Logger.debug("Debugging info");
         Logger.warn("This is a warning");
         Logger.error("An error occurred");
-
-        // 关闭日志系统
-        Logger.shutdown();
     }
 }
