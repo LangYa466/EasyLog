@@ -9,7 +9,7 @@ import cn.langya.Logger;
 public class LogPerformanceTest {
     public static void main(String[] args) {
         int logCount = 100;
-        int testRounds = 2;
+        int testRounds = 5;
 
         Logger.setHasColorInfo(false);
         Logger.setWriteFile(true);

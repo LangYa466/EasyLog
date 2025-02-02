@@ -3,8 +3,9 @@ package cn.langya;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.*;
 
 /**
  * @author LangYa
@@ -24,13 +25,16 @@ public class Logger {
     private static final String GREEN = "\u001B[32m";
     private static final String CYAN = "\u001B[36m";
     private static final String BLUE = "\u001B[34m";
-
     private static boolean writeFile;
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    // 使用 LinkedBlockingQueue 作为日志缓冲队列
+    private static final BlockingQueue<String> logQueue = new LinkedBlockingQueue<>(10000);
     private static final ExecutorService logExecutor = Executors.newSingleThreadExecutor();
 
     static {
         LogServer.init();
-        TimeUpdater.init();
+        startLogSender();
     }
 
     public static void setHasColorInfo(boolean hasColorInfo) {
@@ -88,9 +92,9 @@ public class Logger {
     }
 
     private static void asyncPrint(LogLevel level, String color, String message, Object... args) {
-        String timestamp = TimeUpdater.getCurrentTime();
+        String timestamp = LocalDateTime.now().format(FORMATTER);
         String logLevel = level.toString();
-        String formattedMessage = formatMessage(message, args); // 直接格式化日志消息
+        String formattedMessage = formatMessage(message, args);
         String threadName = Thread.currentThread().getName();
 
         StringBuilder finalMessage = new StringBuilder(256);
@@ -105,25 +109,39 @@ public class Logger {
                     .append(formattedMessage);
         }
 
-        // 异步发送到日志服务器
+        String logString = finalMessage.toString();
         if (writeFile) {
-            logExecutor.submit(() -> sendToLogServer(finalMessage.toString(), color));
+            try {
+                logQueue.put(logString);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
-
-        // 最终打印日志
-        System.out.println(finalMessage);
+        System.out.println(logString);
     }
 
-    private static void sendToLogServer(String message, String color) {
-        try (Socket socket = new Socket(LOG_SERVER_HOST, LOG_SERVER_PORT);
-             OutputStream outputStream = socket.getOutputStream()) {
-            // 如果不需要颜色信息，可以直接拼接清理后的日志信息
-            String logMessage = hasColorInfo ? message : message.replace(color, "").replace(RESET, "");
-            outputStream.write((logMessage + "\n").getBytes());
-            outputStream.flush();
-        } catch (IOException e) {
-            System.err.println("Log server connection failed: " + e.getMessage());
-        }
+    private static volatile boolean isRunning = true; // 用于控制线程的退出
+
+    private static void startLogSender() {
+        logExecutor.submit(() -> {
+            try (Socket socket = new Socket(LOG_SERVER_HOST, LOG_SERVER_PORT);
+                 OutputStream outputStream = socket.getOutputStream()) {
+                while (isRunning) {  // 检查是否停止
+                    String logMessage = logQueue.take();
+                    outputStream.write((logMessage + "\n").getBytes());
+                    outputStream.flush();
+                }
+            } catch (IOException | InterruptedException e) {
+                System.err.println("Log server connection failed: " + e.getMessage());
+            }
+        });
+    }
+
+    // 在适当的地方停止线程
+    public static void shutdown() {
+        isRunning = false;
+        logExecutor.shutdownNow();
+        LogServer.shutdown();
     }
 
     public enum LogLevel {

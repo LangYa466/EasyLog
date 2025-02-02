@@ -17,5 +17,7 @@ public class Main {
         Logger.debug("Debugging info");
         Logger.warn("This is a warning");
         Logger.error("An error occurred");
+
+        Logger.shutdown();
     }
 }
